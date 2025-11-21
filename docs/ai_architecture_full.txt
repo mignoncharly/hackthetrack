@@ -1,0 +1,149 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🤖 AI-POWERED COGNITIVE LOAD ESTIMATOR                     ║
+║                          Complete ML Pipeline Architecture                     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│  STEP 1: DATA INGESTION                                                    │
+└────────────────────────────────────────────────────────────────────────────┘
+         📊 Raw Telemetry Data (Sonoma R1 + Road America R1)
+                  ↓ 640 laps, 16 drivers
+         ┌────────────────────────────┐
+         │  Throttle, Brake, Steering  │
+         │  Speed, G-Forces, Position  │
+         └────────────────────────────┘
+                        ↓
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│  STEP 2: INTELLIGENT FEATURE ENGINEERING (AI Layer 1)                     │
+└────────────────────────────────────────────────────────────────────────────┘
+         🧠 95 Features Extracted via Signal Processing
+                        ↓
+    ┌──────────────────┬──────────────────┬──────────────────┐
+    │                  │                  │                  │
+    ↓                  ↓                  ↓                  ↓
+┌─────────┐    ┌──────────┐      ┌─────────┐      ┌───────────┐
+│ Throttle│    │  Brake   │      │Steering │      │   Speed   │
+│  Jerk   │    │  Spikes  │      │ Entropy │      │ Stability │
+│         │    │          │      │         │      │           │
+│ • Mean  │    │ • Rate   │      │ • Mean  │      │ • Std Dev │
+│ • Std   │    │ • Count  │      │ • Std   │      │ • CoV     │
+│ • Max   │    │ • Timing │      │ • Range │      │ • Trends  │
+└─────────┘    └──────────┘      └─────────┘      └───────────┘
+    │                  │                  │                  │
+    └──────────────────┴──────────────────┴──────────────────┘
+                        ↓
+              📈 Feature Matrix: 640 × 95
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│  STEP 3: MACHINE LEARNING MODELS (AI Layer 2 - Core Intelligence)         │
+└────────────────────────────────────────────────────────────────────────────┘
+                        ↓
+         ┌──────────────────────────────────┐
+         │   PARALLEL ML MODEL ENSEMBLE     │
+         └──────────────────────────────────┘
+                        ↓
+    ┌──────────────────┴──────────────────┬──────────────────┐
+    │                                     │                  │
+    ↓                                     ↓                  ↓
+┌─────────────────────┐    ┌──────────────────────┐   ┌──────────────────┐
+│  MODEL 1:           │    │  MODEL 2:            │   │  MODEL 3:        │
+│  XGBoost Classifier │    │  XGBoost Regressor   │   │ Isolation Forest │
+│                     │    │                      │   │                  │
+│ 🎯 Task:            │    │ 🎯 Task:             │   │ 🎯 Task:         │
+│ Focus Drop          │    │ Next-Lap Score       │   │ Anomaly          │
+│ Prediction          │    │ Forecasting          │   │ Detection        │
+│                     │    │                      │   │                  │
+│ ⚡ Type:            │    │ ⚡ Type:             │   │ ⚡ Type:         │
+│ Binary Classification│   │ Regression           │   │ Unsupervised     │
+│                     │    │                      │   │                  │
+│ 📊 Performance:     │    │ 📊 Performance:      │   │ 📊 Method:       │
+│ • AUC: 0.966        │    │ • R²: 0.718          │   │ • Contamination  │
+│ • Precision: 0.91   │    │ • MAE: 8.3           │   │   5% auto-tuned  │
+│ • Recall: 0.88      │    │ • RMSE: 11.2         │   │ • Tree depth: 8  │
+│                     │    │                      │   │                  │
+│ 🔢 Output:          │    │ 🔢 Output:           │   │ 🔢 Output:       │
+│ P(drop) ∈ [0,1]     │    │ Score ∈ [0,100]      │   │ Binary (0/1)     │
+└─────────────────────┘    └──────────────────────┘   └──────────────────┘
+         │                              │                       │
+         └──────────────────────────────┴───────────────────────┘
+                                       ↓
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│  STEP 4: EXPLAINABLE AI (AI Layer 3 - Transparency)                       │
+└────────────────────────────────────────────────────────────────────────────┘
+                        ↓
+              ┌──────────────────┐
+              │  SHAP EXPLAINER  │
+              │  (TreeExplainer)  │
+              └──────────────────┘
+                        ↓
+        🔍 Feature Attribution Analysis
+                        ↓
+    ┌───────────────────────────────────────┐
+    │  Top 10 Contributing Features         │
+    ├───────────────────────────────────────┤
+    │  1. Throttle_Jerk_mean    +0.45       │
+    │  2. Steering_Entropy      +0.32       │
+    │  3. Brake_Spike_Rate      +0.28       │
+    │  4. Speed_Std             +0.19       │
+    │  5. G_Force_Lateral       -0.15       │
+    │  ...                                  │
+    └───────────────────────────────────────┘
+                        ↓
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│  STEP 5: PERSONALIZED AI (AI Layer 4 - Adaptive Learning)                 │
+└────────────────────────────────────────────────────────────────────────────┘
+                        ↓
+         ┌──────────────────────────────┐
+         │  DRIVER BASELINE COMPUTATION  │
+         │   (Per-Driver Learning)       │
+         └──────────────────────────────┘
+                        ↓
+    ┌────────────────────────────────────────┐
+    │  16 Individual AI Profiles Created     │
+    ├────────────────────────────────────────┤
+    │  For each driver:                      │
+    │  • μ (mean focus score)                │
+    │  • σ (standard deviation)              │
+    │  • Percentiles (p10, p50, p90)         │
+    │  • Risk metrics (drop rate, mistakes)  │
+    │  • Adaptive thresholds:                │
+    │    - Critical = μ - 2σ                 │
+    │    - Warning  = μ - 1σ                 │
+    │    - Excellent = μ + 1σ                │
+    └────────────────────────────────────────┘
+                        ↓
+              Z-Score Normalization:
+              z = (x - μ) / σ
+                        ↓
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│  STEP 6: PRODUCTION INFERENCE (AI Layer 5 - Real-Time Serving)            │
+└────────────────────────────────────────────────────────────────────────────┘
+                        ↓
+         ┌──────────────────────────────┐
+         │    FastAPI ML Serving         │
+         │    (<100ms latency)           │
+         └──────────────────────────────┘
+                        ↓
+    ┌─────────────────────────────────────┐
+    │  5 REST API Endpoints:              │
+    ├─────────────────────────────────────┤
+    │  POST /api/v1/cli/score             │
+    │  GET  /api/v1/cli/driver/{id}/baseline │
+    │  POST /api/v1/cli/predict           │
+    │  GET  /api/v1/cli/explain           │
+    │  GET  /api/v1/cli/health            │
+    └─────────────────────────────────────┘
+                        ↓
+         🎨 Streamlit Dashboard UI
+         (6 Interactive Tabs)
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  🏆 RESULT: Real-Time AI Focus Bar                                           ║
+║  📊 Focus Score: 80.7/100 (+30.7 vs personal baseline)                      ║
+║  ⚠️  Alert Level: 0/3 (Normal)                                               ║
+║  🔮 Next Lap Prediction: 78.3 (2.4 point drop expected)                     ║
+╚══════════════════════════════════════════════════════════════════════════════╝

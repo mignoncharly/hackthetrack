@@ -1,0 +1,8 @@
+# Flask Frontend Requirements
+Flask
+Flask-SocketIO
+Flask-CORS
+pandas
+requests
+python-socketio
+eventlet

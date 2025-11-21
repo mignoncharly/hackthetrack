@@ -1,0 +1,79 @@
+╔════════════════════════════════════════════════════════════════════════╗
+║                        🤖 ML MODEL SPECIFICATIONS                       ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  MODEL 1: FOCUS DROP CLASSIFIER                                         │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Algorithm:        XGBoost (eXtreme Gradient Boosting)                  │
+│  Library:          xgboost==2.0.3                                       │
+│  Model Type:       Binary Classification                                │
+│  Target Variable:  focus_drop_next (0/1)                                │
+│                                                                         │
+│  Hyperparameters:                                                       │
+│  ├─ n_estimators:         200                                           │
+│  ├─ max_depth:            6                                             │
+│  ├─ learning_rate:        0.1                                           │
+│  ├─ subsample:            0.8                                           │
+│  ├─ colsample_bytree:     0.8                                           │
+│  └─ objective:            binary:logistic                               │
+│                                                                         │
+│  Training:                                                              │
+│  ├─ Dataset:              640 laps                                      │
+│  ├─ Validation:           5-fold CV                                     │
+│  ├─ Class balance:        SMOTE resampling                              │
+│  └─ Training time:        ~12 seconds                                   │
+│                                                                         │
+│  Performance (Test Set):                                                │
+│  ├─ AUC-ROC:              0.966 ⭐⭐⭐⭐⭐                               │
+│  ├─ Precision:            0.910                                         │
+│  ├─ Recall:               0.882                                         │
+│  ├─ F1-Score:             0.896                                         │
+│  └─ Accuracy:             0.924                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  MODEL 2: FOCUS SCORE REGRESSOR                                         │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Algorithm:        XGBoost Regression                                   │
+│  Model Type:       Continuous Regression                                │
+│  Target Variable:  FocusScore_smooth (0-100)                            │
+│                                                                         │
+│  Hyperparameters:                                                       │
+│  ├─ n_estimators:         300                                           │
+│  ├─ max_depth:            8                                             │
+│  ├─ learning_rate:        0.05                                          │
+│  └─ objective:            reg:squarederror                              │
+│                                                                         │
+│  Performance:                                                           │
+│  ├─ R² Score:             0.718 ⭐⭐⭐⭐                                 │
+│  ├─ MAE:                  8.3 points                                    │
+│  ├─ RMSE:                 11.2 points                                   │
+│  └─ MAPE:                 14.6%                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  MODEL 3: ANOMALY DETECTOR                                              │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Algorithm:        Isolation Forest                                     │
+│  Model Type:       Unsupervised Outlier Detection                       │
+│  Library:          scikit-learn                                         │
+│                                                                         │
+│  Hyperparameters:                                                       │
+│  ├─ n_estimators:         100                                           │
+│  ├─ max_samples:          auto                                          │
+│  ├─ contamination:        0.05 (5%)                                     │
+│  └─ random_state:         42                                            │
+│                                                                         │
+│  Use Case:                                                              │
+│  └─ Detects unusual driving patterns indicating fatigue/distraction     │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  EXPLAINABILITY: SHAP TreeExplainer                                     │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Purpose:          Explain black-box model predictions                  │
+│  Method:           Shapley Additive Explanations                        │
+│  Output:           Feature importance per prediction                    │
+│  Compute Time:     ~50ms per explanation                                │
+└─────────────────────────────────────────────────────────────────────────┘

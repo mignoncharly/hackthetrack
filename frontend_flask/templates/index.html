@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏎️ GR Cup CLI Monitor - Flask Edition</title>
+
+    <!-- Plotly.js for visualizations - UPDATED CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.27.0/plotly.min.js"></script>
+
+    <!-- Socket.IO for real-time updates - UPDATED CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.5.4/dist/socket.io.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏎️</text></svg>">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <h2>🏎️ Loading GR Cup CLI Monitor...</h2>
+        <p>Initializing AI models and driver data</p>
+    </div>
+
+    <!-- Main Container -->
+    <div id="app-container" class="app-container" style="display: none;">
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>🎛️ Control Panel</h2>
+            </div>
+
+            <!-- API Status -->
+            <div class="status-section">
+                <div id="api-status" class="status-badge checking">
+                    <span class="status-icon">🔄</span>
+                    <span id="status-text">Checking API...</span>
+                </div>
+                <div id="ml-api-status" class="status-badge-small checking">
+                    <span id="ml-status-text">ML API: Checking...</span>
+                </div>
+            </div>
+
+            <!-- Driver Selection -->
+            <div class="control-section">
+                <label class="control-label">
+                    <span class="label-icon">🏎️</span>
+                    Select Driver
+                </label>
+                <select id="driver-select" class="driver-select">
+                    <option value="">Loading drivers...</option>
+                </select>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Replay Controls -->
+            <div class="control-section">
+                <h3 class="section-title">
+                    <span class="title-icon">🎬</span>
+                    Replay Controls
+                </h3>
+
+                <!-- Playback Status -->
+                <div id="playback-status" class="playback-status paused">
+                    <span class="status-emoji">⏸️</span>
+                    <span class="status-text">PAUSED</span>
+                    <div class="status-details">
+                        Lap <span id="current-lap-sidebar">1</span> / <span id="max-lap-sidebar">1</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div id="progress-bar" class="progress-bar"></div>
+                    <div class="progress-text">
+                        <span id="progress-percentage">0%</span>
+                    </div>
+                </div>
+
+                <!-- Control Buttons -->
+                <div class="button-grid">
+                    <button id="btn-play" class="btn btn-primary" title="Start/Pause playback">
+                        <span class="btn-icon">▶️</span>
+                        <span class="btn-text">Play</span>
+                    </button>
+                    <button id="btn-stop" class="btn btn-danger" title="Stop and reset" disabled>
+                        <span class="btn-icon">⏹️</span>
+                        <span class="btn-text">Stop</span>
+                    </button>
+                    <button id="btn-start" class="btn btn-secondary" title="Jump to first lap" disabled>
+                        <span class="btn-icon">⏮️</span>
+                        <span class="btn-text">Start</span>
+                    </button>
+                    <button id="btn-end" class="btn btn-secondary" title="Jump to last lap">
+                        <span class="btn-icon">⏭️</span>
+                        <span class="btn-text">End</span>
+                    </button>
+                </div>
+
+                <!-- Speed Control -->
+                <div class="control-group">
+                    <label class="control-label">
+                        <span class="label-icon">⚡</span>
+                        Replay Speed: <span id="speed-value" class="speed-value">1.0x</span>
+                    </label>
+                    <input type="range" id="speed-slider" class="speed-slider" min="0" max="4" value="2" step="1">
+                    <div class="speed-markers">
+                        <span>0.5x</span>
+                        <span>1x</span>
+                        <span>2x</span>
+                        <span>5x</span>
+                        <span>10x</span>
+                    </div>
+                </div>
+
+                <!-- Lap Slider -->
+                <div class="control-group" id="lap-slider-group">
+                    <label class="control-label">
+                        <span class="label-icon">🎯</span>
+                        Select Lap
+                    </label>
+                    <input type="range" id="lap-slider" class="lap-slider" min="1" max="100" value="1">
+                    <div class="lap-slider-value">
+                        <span id="lap-slider-text">Lap 1</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Multi-Driver Comparison -->
+            <div class="control-section">
+                <h3 class="section-title">
+                    <span class="title-icon">👥</span>
+                    Multi-Driver Compare
+                </h3>
+                <div id="driver-comparison-list" class="driver-checkbox-list">
+                    <!-- Populated dynamically -->
+                </div>
+                <button id="btn-compare" class="btn btn-info btn-small" disabled>
+                    <span class="btn-icon">📊</span>
+                    <span class="btn-text">Compare Selected</span>
+                </button>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- About Section -->
+            <div class="about-section">
+                <h3 class="section-title">ℹ️ About</h3>
+                <div class="about-content">
+                    <p><strong>AI Driver Cognitive Load Estimator</strong></p>
+                    <ul class="info-list">
+                        <li>🤖 3 ML Models (XGBoost)</li>
+                        <li>📊 96.6% AUC Accuracy</li>
+                        <li>👥 30 Driver Profiles</li>
+                        <li>⚡ <100ms Inference</li>
+                        <li>🏆 Toyota Hack the Track 2025</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <p class="update-time">Last Updated: <span id="last-update-time">--:--:--</span></p>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+
+            <!-- Global Lap Indicator -->
+            <div id="global-lap-indicator" class="global-lap-indicator">
+                <h1 class="lap-display">
+                    🏎️ Current Lap: <strong><span id="current-lap-global">1</span></strong> / <span id="max-lap-global">1</span>
+                    <span class="driver-badge">Driver: Car #<span id="driver-number-global">1</span></span>
+                </h1>
+            </div>
+
+            <!-- Metrics Dashboard -->
+            <div class="metrics-dashboard" id="metrics-container">
+                <div class="metric-card">
+                    <div class="metric-icon">🎯</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Focus Score</div>
+                        <div class="metric-value" id="metric-focus">--</div>
+                        <div class="metric-delta" id="metric-focus-delta">--</div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">⚠️</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Drop Risk</div>
+                        <div class="metric-value" id="metric-risk">--</div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon alert-icon" id="alert-icon">✅</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Alert Level</div>
+                        <div class="metric-value" id="metric-alert">0/3</div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">🔍</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Anomaly</div>
+                        <div class="metric-value" id="metric-anomaly">No</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tabs-nav">
+                <button class="tab-button active" data-tab="tab-live">
+                    <span class="tab-icon">📊</span>
+                    <span class="tab-label">Live Monitor</span>
+                </button>
+                <button class="tab-button" data-tab="tab-replay">
+                    <span class="tab-icon">🎬</span>
+                    <span class="tab-label">Replay & Analysis</span>
+                </button>
+                <button class="tab-button" data-tab="tab-timeline">
+                    <span class="tab-icon">📈</span>
+                    <span class="tab-label">Timeline & Events</span>
+                </button>
+                <button class="tab-button" data-tab="tab-analytics">
+                    <span class="tab-icon">🔬</span>
+                    <span class="tab-label">Advanced Analytics</span>
+                </button>
+                <button class="tab-button" data-tab="tab-compare">
+                    <span class="tab-icon">👥</span>
+                    <span class="tab-label">Multi-Driver</span>
+                </button>
+                <button class="tab-button" data-tab="tab-baseline">
+                    <span class="tab-icon">🎯</span>
+                    <span class="tab-label">Baseline</span>
+                </button>
+            </div>
+
+            <!-- Tab Content Panels -->
+            <div class="tabs-content">
+
+                <!-- TAB 1: Live Monitor -->
+                <div class="tab-panel active" id="tab-live">
+                    <div id="live-mode-indicator" class="live-mode-indicator" style="display: none;">
+                        🔴 LIVE REPLAY MODE - Data updating automatically
+                    </div>
+
+                    <div class="content-grid two-column">
+                        <div class="chart-section">
+                            <div class="chart-card">
+                                <h3 class="chart-title">🎯 Focus Gauge</h3>
+                                <div id="chart-focus-gauge" class="chart-container"></div>
+                            </div>
+
+                            <div class="status-card" id="status-card">
+                                <h3 class="card-title">🚨 Current Status</h3>
+                                <div id="status-message" class="status-message">
+                                    <!-- Populated dynamically -->
+                                </div>
+                                <div id="recommended-actions" class="recommended-actions">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <div class="events-card" id="events-card">
+                                <h3 class="card-title">🏁 Lap Events</h3>
+                                <div id="lap-events" class="lap-events">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-section">
+                            <div class="chart-card">
+                                <h3 class="chart-title">🎯 Performance Radar</h3>
+                                <div id="chart-performance-radar" class="chart-container"></div>
+                            </div>
+
+                            <div class="telemetry-card">
+                                <h3 class="card-title">📊 Key Telemetry Metrics</h3>
+                                <div class="telemetry-grid" id="telemetry-grid">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: Replay & Analysis -->
+                <div class="tab-panel" id="tab-replay">
+                    <div class="replay-progress-card">
+                        <h2 class="progress-title">
+                            Lap <span id="replay-current-lap">1</span> of <span id="replay-max-lap">1</span> -
+                            <span id="replay-progress-pct">0.0%</span> Complete
+                        </h2>
+                        <div class="progress-container-large">
+                            <div id="replay-progress-bar" class="progress-bar-large"></div>
+                        </div>
+                    </div>
+
+                    <div class="content-grid two-column-timeline">
+                        <div class="chart-section chart-section-large">
+                            <div class="chart-card">
+                                <h3 class="chart-title">📈 Session Timeline</h3>
+                                <div id="chart-timeline" class="chart-container-large"></div>
+                            </div>
+                        </div>
+
+                        <div class="chart-section">
+                            <div class="summary-card">
+                                <h3 class="card-title">📊 Session Summary</h3>
+                                <div id="session-summary" class="session-summary">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: Timeline & Events -->
+                <div class="tab-panel" id="tab-timeline">
+                    <div class="chart-card">
+                        <h3 class="chart-title">📈 Complete Session Timeline</h3>
+                        <div id="chart-full-timeline" class="chart-container-full"></div>
+                    </div>
+
+                    <div class="events-log-card">
+                        <h3 class="card-title">📋 Event Log</h3>
+                        <div id="event-log-table" class="event-log-table">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: Advanced Analytics -->
+                <div class="tab-panel" id="tab-analytics">
+                    <div class="chart-card">
+                        <h3 class="chart-title">🔬 CLI Component Evolution Heatmap</h3>
+                        <div id="chart-heatmap" class="chart-container-medium"></div>
+                    </div>
+
+                    <div class="content-grid two-column">
+                        <div class="analytics-card">
+                            <h3 class="card-title">📊 Statistical Analysis</h3>
+                            <div id="statistics-table" class="statistics-table">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <h3 class="card-title">🎯 Performance Percentiles</h3>
+                            <div id="chart-percentiles" class="chart-container-small"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: Multi-Driver Compare -->
+                <div class="tab-panel" id="tab-compare">
+                    <div class="chart-card">
+                        <h3 class="chart-title">👥 Multi-Driver Focus Comparison</h3>
+                        <div id="chart-multi-driver" class="chart-container-large"></div>
+                    </div>
+
+                    <div class="comparison-table-card" id="comparison-stats-card" style="display: none;">
+                        <h3 class="card-title">📊 Comparative Statistics</h3>
+                        <div id="comparison-stats-table" class="comparison-table">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="empty-state" id="compare-empty-state">
+                        <div class="empty-state-icon">👈</div>
+                        <h3>Select drivers to compare</h3>
+                        <p>Use the sidebar to select 2 or more drivers for comparison</p>
+                    </div>
+                </div>
+
+                <!-- TAB 6: Personalized Baseline -->
+                <div class="tab-panel" id="tab-baseline">
+                    <div class="content-grid two-column">
+                        <div class="chart-section">
+                            <div class="chart-card">
+                                <h3 class="chart-title">🎯 Personalized Focus Score</h3>
+                                <div id="chart-baseline-gauge" class="chart-container"></div>
+                            </div>
+
+                            <div class="performance-card" id="performance-vs-baseline">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <div class="chart-section">
+                            <div class="driver-profile-card">
+                                <h3 class="card-title">📊 Your Driver Profile</h3>
+                                <div id="driver-profile" class="driver-profile">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3 class="chart-title">📈 Performance vs Baseline Over Time</h3>
+                        <div id="chart-baseline-timeline" class="chart-container-large"></div>
+                    </div>
+
+                    <div class="baseline-unavailable" id="baseline-unavailable" style="display: none;">
+                        <div class="warning-icon">⚠️</div>
+                        <h3>Personalized baseline not available</h3>
+                        <p>This driver needs more historical data to generate a personalized baseline</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="main-footer">
+                <p>
+                    🏎️ <strong>GR Cup CLI Monitor v3.0 - Flask Edition</strong> |
+                    Powered by XGBoost (AUC: 0.966) + SHAP |
+                    FastAPI Backend | Plotly.js | Flask + SocketIO |
+                    Last Updated: <span id="footer-update-time">--:--:--</span>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/controls.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/visualizations.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/websocket.js') }}"></script>
+</body>
+</html>

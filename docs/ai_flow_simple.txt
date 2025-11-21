@@ -1,0 +1,23 @@
+╔════════════════════════════════════════════════════════════════╗
+║          🧠 AI COGNITIVE LOAD ESTIMATOR - SIMPLE FLOW          ║
+╚════════════════════════════════════════════════════════════════╝
+
+📊 RAW TELEMETRY
+    ↓
+🔧 95 AI-ENGINEERED FEATURES
+    ↓
+┌────────────────────────────────────┐
+│   3 ML MODELS (Parallel)           │
+├────────────────────────────────────┤
+│  1. Focus Drop Predictor (96.6% AUC)│
+│  2. Next-Lap Forecaster (R² 0.718)  │
+│  3. Anomaly Detector (Unsupervised) │
+└────────────────────────────────────┘
+    ↓
+💡 SHAP EXPLAINER (Why this prediction?)
+    ↓
+👤 PERSONALIZED AI (16 driver profiles)
+    ↓
+⚡ REAL-TIME API (<100ms)
+    ↓
+🎯 FOCUS BAR: 80.7/100
