@@ -444,5 +444,24 @@ In Screenshots directory
 
 ---
 
+# PythonAnywhere Deployment (its better to run local) - Racing AI
+
+## Important Limitations
+
+### WebSocket Support
+**PythonAnywhere FREE tier does NOT support WebSockets.** This means:
+- Flask-SocketIO real-time features will NOT work
+- The application will fall back to HTTP polling for updates
+
+### What Works on Free Tier:
+- Flask web dashboard (all visualizations)
+- REST API endpoints
+- ML predictions (XGBoost, scikit-learn)
+- Driver data, baselines, and comparisons
+- Replay controls (using polling instead of WebSockets)
+
+### What Requires Paid Tier:
+- Real-time WebSocket synchronization between multiple users
+- FastAPI backend (requires "Always-on" task - paid feature)
 
 [![Star on GitHub](https://img.shields.io/github/stars/mignoncharly/racing-ai?style=social)](https://github.com/mignoncharly/racing-ai)
